@@ -3,30 +3,36 @@
 #include <iomanip> 
 #include <cstdlib> 
 #include <ctime>   
-#include "Invent.h" // Make sure this matches your exact filename (Invent.h or invent.h)
+#include "invent.h"
+#include "enemy.h"
+#include "potion.h"
 
 using namespace std;
 
-// Game State Variables
+// SETUP VARIABLES
 int playerHP = 20;
 int playerMaxHP = 20;
 int monsterHP = 5;
 int monsterMaxHP = 5;
 
+//STATUS VARIABLES
 int enemy_strength = 0;
 int player_strength = 0;   
+int player_poison = 0;
+int enemy_poison = 0;
+int player_thorns = 0;
+int enemy_thorns = 0;
+int player_regeneration = 0;
+int enemy_regeneration = 0;
 
 int enemy_dmg = 0;
 
-
-string monsterName = "Goblin";
+string monsterName = "Doctor";
 string monsterLog = ""; 
 string playerLog = "";
 string enemyIntent = "";
-string enemyIntentType = ""; 
 
-
-// Helper function INVENT
+//count inv
 int countPotions(Inventory& inv) {
     int count = 0;
     Item* temp = inv.head;
@@ -37,7 +43,7 @@ int countPotions(Inventory& inv) {
     return count;
 }
 
-// Helper function to display potions numerically
+//UI
 void displayNumberedPotions(Inventory& inv) {
     Item* temp = inv.head;
     int index = 1;
@@ -53,7 +59,7 @@ void displayNumberedPotions(Inventory& inv) {
     cout << "===============================\n";
 }
 
-// Helper function to grab item name at a numeric position
+//CHOOSE POTION
 string getPotionAt(Inventory& inv, int targetIndex) {
     Item* temp = inv.head;
     int currentIndex = 1;
@@ -67,37 +73,30 @@ string getPotionAt(Inventory& inv, int targetIndex) {
     return "";
 }
 
-// Health bar generator
-string generateHealthBar(int current, int max, int barWidth = 10) 
-{
+// Health bar 
+string generateHealthBar(int current, int max, int barWidth = 10) {
     if (current < 0) current = 0;
-    
     int filledSegments = (current * barWidth) / max;
     if (filledSegments == 0 && current > 0) filledSegments = 1;
 
     string bar = "[";
     for (int i = 0; i < barWidth; i++) {
-        if (i < filledSegments) {
-            bar += "|"; 
-        } else {
-            bar += "-"; 
-        }
+        if (i < filledSegments) bar += "|"; 
+        else bar += "-"; 
     }
     bar += "]";
     return bar;
 }
 
 // Renders
-void displayBattleScreen() 
-{
+void displayBattleScreen() {
     #ifdef _WIN32
-        system("cls");  // Windows 
+        system("cls");  
     #else
-        system("clear"); // Linux / macOS 
+        system("clear"); 
     #endif
 
     constexpr int SCREEN_WIDTH = 100;
-    
     cout << "+";
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << "-";
     cout << "+\n";
@@ -105,13 +104,11 @@ void displayBattleScreen()
     string playerHeader = "  PLAYER";
     string monsterHeader = monsterName;
     int spacesBetweenHeaders = SCREEN_WIDTH - 2 - playerHeader.length() - monsterHeader.length();
-    
     cout << "|" << playerHeader << string(spacesBetweenHeaders, ' ') << monsterHeader << "|\n";
 
     string playerHPStr = "  HP: " + generateHealthBar(playerHP, playerMaxHP) + " " + to_string(playerHP) + "/" + to_string(playerMaxHP);
     string monsterHPStr = "HP: " + generateHealthBar(monsterHP, monsterMaxHP) + " " + to_string(monsterHP) + "/" + to_string(monsterMaxHP) + "  ";
     int spacesBetweenHP = SCREEN_WIDTH - 2 - playerHPStr.length() - monsterHPStr.length();
-    
     cout << "|" << playerHPStr << string(spacesBetweenHP, ' ') << monsterHPStr << "|\n";
 
     cout << "|";
@@ -128,6 +125,17 @@ void displayBattleScreen()
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
     cout << "|\n";
 
+    //EFFECTS 
+    cout << "|  Status: " << string(SCREEN_WIDTH - 20, ' ') << "Status: |\n";
+    cout << "|  Strength: " << player_strength << string(SCREEN_WIDTH - 26 - to_string(player_strength).length() - to_string(enemy_strength).length(), ' ') << "Strength: " << enemy_strength << "  |\n";
+    cout << "|  Poison: " << player_poison << string(SCREEN_WIDTH - 22 - to_string(player_poison).length() - to_string(enemy_poison).length(), ' ') << "Poison: " << enemy_poison << "  |\n";
+    cout << "|  Thorns: " << player_thorns << string(SCREEN_WIDTH - 22 - to_string(player_thorns).length() - to_string(enemy_thorns).length(), ' ') << "Thorns: " << enemy_thorns << "  |\n";
+    cout << "|  Regeneration: " << player_regeneration << string(SCREEN_WIDTH - 34 - to_string(player_regeneration).length() - to_string(enemy_regeneration).length(), ' ') << "Regeneration: " << enemy_regeneration << "  |\n";   
+
+    cout << "|";
+    for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
+    cout << "|\n";
+
     cout << "|  [Action Menu]" << string(SCREEN_WIDTH - 17, ' ') << "|\n";
     cout << "|  1. Select Potion" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
     cout << "|  2. Run Away" << string(SCREEN_WIDTH - 15, ' ') << "|\n";
@@ -136,64 +144,34 @@ void displayBattleScreen()
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << "-";
     cout << "+\n";
 
-    cout << "|  LOG: " + playerLog;
-    int logPadding = SCREEN_WIDTH - 9 - playerLog.length(); 
-    if (logPadding > 0) cout << string(logPadding, ' ');
-    cout << "|\n";
+    cout << "PLAYER LOG: " + playerLog + "\n";
 
-    cout << "|  LOG: " + monsterLog;
-    int logPadding3 = SCREEN_WIDTH - 9 - monsterLog.length(); 
-    if (logPadding3 > 0) cout << string(logPadding3, ' ');
-    cout << "|\n";
+    cout << "ENEMY LOG: " + monsterLog + "\n";
 
-    cout << "|  ENEMY INTENT: " + enemyIntent;
-    int logPadding2 = SCREEN_WIDTH - 18 - enemyIntent.length(); 
-    if (logPadding2 > 0) cout << string(logPadding2, ' ');
-    cout << "|\n";
+    cout << "ENEMY INTENT: " + enemyIntent + "\n";
 
     cout << "+";
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << "-";
     cout << "+\n";
 }
 
-// Generate what monster plans to do next turn
-void generateNextIntent() {
-    int r = rand() % 3;
-    
-    monsterName = "Goblin";
-    if (r == 0) {   
-        enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
-        enemy_dmg = 1;
-    }
-    else if (r == 1) 
-    {
-        enemyIntent = "Buff (+1 DMG in this battle)";  
-    }
-    else 
-    {
-        enemyIntent = "Heavy Attack (" + to_string(2 + enemy_strength) + " DMG)";
-        enemy_dmg = 2;
-    }
-}
-
-
-
-int main() 
-{
+int main() {
     srand(time(0));
     
-    
+    //INV
     Inventory bag;
-    bag.addItem("Attack Potion: Deals 1 DMG, return this potion at end of turn");
-    bag.addItem("Defend Potion: Block 2 DMG, return this potion at end of turn");
-    bag.addItem("Strength Potion: Increases DMG by 1 in this battle");
-
+    bag.addItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn");
+    bag.addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
+    bag.addItem("[Strength Potion] Increases DMG by 1 in this battle");
+    bag.addItem("[Gambling Potion] Deal 0-3 DMG randomly");
+    bag.addItem("[Weak Potion] Enemy DMG decreased by 1 in this battle");
+    bag.addItem("[Poison Potion] Apply 1 Poison");
 
     generateNextIntent();
 
     while (playerHP > 0 && monsterHP > 0) {
         displayBattleScreen();
-        cout << "Choose action (1-2): ";
+        cout << "Choose action (1: Select Potion, 2: Run Away): ";
         int choice;
         
         if (!(cin >> choice)) {
@@ -231,31 +209,34 @@ int main()
                 bag.removeItem(chosenPotion); 
 
                 int dmg = 0;
-                int heal = 0;
                 int block = 0;
-                if (chosenPotion == "Attack Potion: Deals 1 DMG, return this potion at end of turn") {
-                    dmg = 1;
-                    bag.addItem("Attack Potion: Deals 1 DMG, return this potion at end of turn");
-                    playerLog = "Player used Attack Potion, dealing 1 DMG.";
+                
+                // Call potion.h
+                handlePotionUsage(chosenPotion, bag, dmg, block);
 
-                } else if (chosenPotion == "Strength Potion: Increases DMG by 1 in this battle") {
-                    player_strength += 1;
-                    playerLog = "Player used Strength Potion, increasing damage by 1!";
-
-                } else if (chosenPotion == "Defend Potion: Block 2 DMG, return this potion at end of turn") {
-                    block = 2;
-                    bag.addItem("Defend Potion: Block 2 DMG, return this potion at end of turn");
-                    playerLog = "Player used Defend Potion, blocking 2 DMG.";
+                // Player turn damage resolution
+                if (dmg > 0 || chosenPotion.find("Attack Potion") != string::npos || chosenPotion.find("Gambling Potion") != string::npos) {
+                    monsterHP -= (dmg + player_strength);
+                    playerLog = "Player used " + chosenPotion.substr(0, chosenPotion.find("]")+1) + ", dealing " + to_string(dmg + player_strength) + " DMG!";
+                    if (enemy_thorns > 0) {
+                        playerHP -= enemy_thorns;
+                        playerLog += " Player takes " + to_string(enemy_thorns) + " thorns damage!";
+                    }
                 }
 
-                // Process Player turn actions
-                if (dmg > 0) {
-                    monsterHP -= dmg + player_strength;
+                if (player_poison > 0) {
+                    playerHP -= player_poison;
+                    playerLog += " Player takes " + to_string(player_poison) + " poison damage!";
                 }
-                playerHP += heal;
-                if (playerHP > playerMaxHP) playerHP = playerMaxHP;
 
+                if (player_regeneration > 0) {
+                    playerHP += player_regeneration;
+                    if (playerHP > playerMaxHP) playerHP = playerMaxHP;
+                    playerLog += " Player regenerates " + to_string(player_regeneration) + " HP!";
+                    player_regeneration -= 1;
+                }
 
+                // Check WIN
                 if (monsterHP <= 0) {
                     monsterHP = 0;
                     monsterLog = playerLog + " " + monsterName + " was crushed!";
@@ -264,24 +245,35 @@ int main()
                     break;
                 }
 
-
-                // Process Monster counter turn action
-
+                // Enemy Response Turn
                 if (enemyIntent.find("Attack") != string::npos) {
-                    enemy_dmg += enemy_strength;
-                    int damageAfterBlock = enemy_dmg - block;
+                    int combinedEnemyDmg = enemy_dmg + enemy_strength;
+                    int damageAfterBlock = combinedEnemyDmg - block;
+                    if (player_thorns > 0) {
+                        monsterHP -= player_thorns;
+                        monsterLog += " " + monsterName + " takes " + to_string(player_thorns) + " thorns damage!";
+                    }
                     if (damageAfterBlock < 0) damageAfterBlock = 0;
                     playerHP -= damageAfterBlock;
-                    monsterLog = monsterName + " attacks for " + to_string(enemy_dmg) + " DMG! Player blocks " + to_string(block) + " DMG.";
+                    monsterLog = monsterName + " attacks for " + to_string(combinedEnemyDmg) + " DMG! Player blocks " + to_string(block) + " DMG.";
                 }
                 else if (enemyIntent.find("Buff") != string::npos) {
-                    enemy_strength += 1;
                     monsterLog = monsterName + " buffs itself";
                 }
 
+                if (enemy_poison > 0) {
+                    monsterHP -= enemy_poison;
+                    monsterLog += " " + monsterName + " takes " + to_string(enemy_poison) + " poison damage!";
+                }
+
+                if (enemy_regeneration > 0) {
+                    monsterHP += enemy_regeneration;
+                    if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
+                    monsterLog += " " + monsterName + " regenerates " + to_string(enemy_regeneration) + " HP!";
+                    enemy_regeneration -= 1;
+                }
+            
                 if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
-
-
 
                 if (playerHP <= 0) {
                     playerHP = 0;

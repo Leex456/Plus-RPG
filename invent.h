@@ -17,18 +17,14 @@ void displayNumberedPotions(Inventory& inv);
 string getPotionAt(Inventory& inv, int targetIndex);
 
 class Inventory {
-
 private:
     Item* head;
 
 public:
-
-    // Constructor
     Inventory() {
         head = NULL;
     }
 
-    // Add item
     void addItem(string itemName) {
         Item* newItem = new Item;
         newItem->name = itemName;
@@ -36,8 +32,7 @@ public:
 
         if (head == NULL) {
             head = newItem;
-        }
-        else {
+        } else {
             Item* temp = head;
             while (temp->next != NULL) {
                 temp = temp->next;
@@ -47,13 +42,11 @@ public:
         cout << itemName << " added!\n";
     }
 
-    // Show inventory
     void showInventory() {
         if (head == NULL) {
             cout << "Inventory empty.\n";
             return;
         }
-
         Item* temp = head;
         cout << "\nInventory:\n";
         while (temp != NULL) {
@@ -62,7 +55,6 @@ public:
         }
     }
 
-    // Remove item
     void removeItem(string itemName) {
         if (head == NULL) {
             cout << "Inventory empty.\n";
@@ -78,8 +70,7 @@ public:
         }
 
         Item* current = head;
-        while (current->next != NULL &&
-               current->next->name != itemName) {
+        while (current->next != NULL && current->next->name != itemName) {
             current = current->next;
         }
 
@@ -88,13 +79,33 @@ public:
             current->next = current->next->next;
             delete temp;
             cout << itemName << " removed!\n";
-        }
-        else {
+        } else {
             cout << "Item not found.\n";
         }
     }
 
-    // Grant exclusive private access to the battle.cpp helper functions
+    void insertItem(string itemName, int position = 1) {
+        Item* newItem = new Item;
+        newItem->name = itemName;
+        newItem->next = NULL;
+
+        if (position <= 1 || head == NULL) {
+            newItem->next = head;
+            head = newItem;
+            return;
+        }
+
+        Item* current = head;
+        int currentPosition = 1;
+        while (current->next != NULL && currentPosition < position - 1) {
+            current = current->next;
+            currentPosition++;
+        }
+
+        newItem->next = current->next;
+        current->next = newItem;
+    }
+
     friend int countPotions(Inventory& inv);
     friend void displayNumberedPotions(Inventory& inv);
     friend string getPotionAt(Inventory& inv, int targetIndex);
