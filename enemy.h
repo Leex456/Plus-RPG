@@ -139,19 +139,9 @@ inline void generateNextIntent() {
             enemy_strength += rand() % 3;
             enemy_dmg = 0; 
         }
-        else if (r == 2) {
-            enemyIntent = "Unknown";  
-            enemy_regeneration += rand() % 3;
-            enemy_dmg = 0; 
-        }
-        else if (r == 3) {
-            enemyIntent = "Unknown";  
-            player_regeneration += rand() % 3;
-            enemy_dmg = 0; 
-        }
         else {
             enemyIntent = "Unknown";  
-            player_strength += rand() % 3;
+            player_regeneration += rand() % 3;
             enemy_dmg = 0; 
         }
     }
