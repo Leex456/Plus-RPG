@@ -57,7 +57,16 @@ inline void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int
     } else if (chosenPotion.find("Poison Potion") != string::npos) {
         enemy_poison += 1;
         playerLog = "Player used Poison Potion, applying 1 poison to the enemy!";
+    
+
+    } else if (chosenPotion.find("Thorn Potion") != string::npos) {
+        player_thorns += 1;
+        playerLog = "Player used Thorn Potion, applying 1 thorn to the player!";
+    
+    
+    } else if (chosenPotion.find("Regeneration Potion") != string::npos) {
+        player_regeneration += 1;
+        playerLog = "Player used Regeneration Potion, applying 1 regeneration to the player!";
     }
-}
 
 #endif
