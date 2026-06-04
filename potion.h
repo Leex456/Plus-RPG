@@ -11,11 +11,7 @@ using namespace std;
 extern int player_strength;
 extern int enemy_strength;
 extern int enemy_poison;
-extern int enemy_thorns;
-extern int enemy_regeneration;
 extern int player_poison;
-extern int player_thorns;
-extern int player_regeneration;
 extern string playerLog;
 
 inline void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int& block) {
@@ -27,46 +23,27 @@ inline void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int
         bag.insertItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn", 1);
         playerLog = "Player used Attack Potion!";
 
-
-
     } else if (chosenPotion.find("Defend Potion") != string::npos) {
         block = 2;
         bag.insertItem("[Defend Potion] Block 2 DMG, return this potion at end of turn", 2);
         playerLog = "Player used Defend Potion, blocking 2 DMG.";
 
-
-
     } else if (chosenPotion.find("Strength Potion") != string::npos) {
         player_strength += 1;
         playerLog = "Player used Strength Potion, increasing damage by 1!";
-
-
 
     } else if (chosenPotion.find("Gambling Potion") != string::npos) {
         dmg = rand() % 4;
         playerLog = "Player used Gambling Potion!";
 
-
-
     } else if (chosenPotion.find("Weak Potion") != string::npos) {
         enemy_strength -= 1;
         playerLog = "Player used Weak Potion, reducing enemy damage by 1!";
 
-
-
     } else if (chosenPotion.find("Poison Potion") != string::npos) {
         enemy_poison += 1;
         playerLog = "Player used Poison Potion, applying 1 poison to the enemy!";
-    
+    } 
 
-    } else if (chosenPotion.find("Thorn Potion") != string::npos) {
-        player_thorns += 1;
-        playerLog = "Player used Thorn Potion, applying 1 thorn to the player!";
-    
-    
-    } else if (chosenPotion.find("Regeneration Potion") != string::npos) {
-        player_regeneration += 1;
-        playerLog = "Player used Regeneration Potion, applying 1 regeneration to the player!";
-    }
 }
 #endif
