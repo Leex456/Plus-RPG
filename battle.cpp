@@ -20,14 +20,10 @@ int enemy_strength = 0;
 int player_strength = 0;   
 int player_poison = 0;
 int enemy_poison = 0;
-int player_thorns = 0;
-int enemy_thorns = 0;
-int player_regeneration = 0;
-int enemy_regeneration = 0;
 
 int enemy_dmg = 0;
 
-string monsterName = "Doctor";
+string monsterName = "Goblin"; // Changed default from Doctor since Doctor was removed
 string monsterLog = ""; 
 string playerLog = "";
 string enemyIntent = "";
@@ -125,12 +121,10 @@ void displayBattleScreen() {
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
     cout << "|\n";
 
-    //EFFECTS 
+    //EFFECTS
     cout << "|  Status: " << string(SCREEN_WIDTH - 20, ' ') << "Status: |\n";
     cout << "|  Strength: " << player_strength << string(SCREEN_WIDTH - 26 - to_string(player_strength).length() - to_string(enemy_strength).length(), ' ') << "Strength: " << enemy_strength << "  |\n";
     cout << "|  Poison: " << player_poison << string(SCREEN_WIDTH - 22 - to_string(player_poison).length() - to_string(enemy_poison).length(), ' ') << "Poison: " << enemy_poison << "  |\n";
-    cout << "|  Thorns: " << player_thorns << string(SCREEN_WIDTH - 22 - to_string(player_thorns).length() - to_string(enemy_thorns).length(), ' ') << "Thorns: " << enemy_thorns << "  |\n";
-    cout << "|  Regeneration: " << player_regeneration << string(SCREEN_WIDTH - 34 - to_string(player_regeneration).length() - to_string(enemy_regeneration).length(), ' ') << "Regeneration: " << enemy_regeneration << "  |\n";   
 
     cout << "|";
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
@@ -145,9 +139,7 @@ void displayBattleScreen() {
     cout << "+\n";
 
     cout << "PLAYER LOG: " + playerLog + "\n";
-
     cout << "ENEMY LOG: " + monsterLog + "\n";
-
     cout << "ENEMY INTENT: " + enemyIntent + "\n";
 
     cout << "+";
@@ -158,14 +150,22 @@ void displayBattleScreen() {
 int main() {
     srand(time(0));
     
-    //INV
+    //INV 
     Inventory bag;
     bag.addItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn");
     bag.addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
-    bag.addItem("[Strength Potion] Increases DMG by 1 in this battle");
-    bag.addItem("[Gambling Potion] Deal 0-3 DMG randomly");
-    bag.addItem("[Weak Potion] Enemy DMG decreased by 1 in this battle");
-    bag.addItem("[Poison Potion] Apply 1 Poison");
+
+    //add 3 random potions to inventory
+    string possiblePotions[] = {
+        "[Strength Potion] Increases damage by 1 permanently",
+        "[Gambling Potion] Deals 0-3 DMG randomly",
+        "[Weak Potion] Reduces enemy damage by 1 permanently",
+        "[Poison Potion] Applies 1 poison to the enemy"
+    };
+
+    for (int i = 0; i < 3; i++) {
+        bag.addItem(possiblePotions[rand() % 4]);
+    }
 
     generateNextIntent();
 
@@ -214,26 +214,15 @@ int main() {
                 // Call potion.h
                 handlePotionUsage(chosenPotion, bag, dmg, block);
 
-                // Player turn damage resolution
+                // Player turn damage resolution (Thorns calculation removed)
                 if (dmg > 0 || chosenPotion.find("Attack Potion") != string::npos || chosenPotion.find("Gambling Potion") != string::npos) {
                     monsterHP -= (dmg + player_strength);
                     playerLog = "Player used " + chosenPotion.substr(0, chosenPotion.find("]")+1) + ", dealing " + to_string(dmg + player_strength) + " DMG!";
-                    if (enemy_thorns > 0) {
-                        playerHP -= enemy_thorns;
-                        playerLog += " Player takes " + to_string(enemy_thorns) + " thorns damage!";
-                    }
                 }
 
                 if (player_poison > 0) {
                     playerHP -= player_poison;
                     playerLog += " Player takes " + to_string(player_poison) + " poison damage!";
-                }
-
-                if (player_regeneration > 0) {
-                    playerHP += player_regeneration;
-                    if (playerHP > playerMaxHP) playerHP = playerMaxHP;
-                    playerLog += " Player regenerates " + to_string(player_regeneration) + " HP!";
-                    player_regeneration -= 1;
                 }
 
                 // Check WIN
@@ -245,14 +234,10 @@ int main() {
                     break;
                 }
 
-                // Enemy Response Turn
+                // Enemy Response Turn (Thorns reflection logic removed)
                 if (enemyIntent.find("Attack") != string::npos) {
                     int combinedEnemyDmg = enemy_dmg + enemy_strength;
                     int damageAfterBlock = combinedEnemyDmg - block;
-                    if (player_thorns > 0) {
-                        monsterHP -= player_thorns;
-                        monsterLog += " " + monsterName + " takes " + to_string(player_thorns) + " thorns damage!";
-                    }
                     if (damageAfterBlock < 0) damageAfterBlock = 0;
                     playerHP -= damageAfterBlock;
                     monsterLog = monsterName + " attacks for " + to_string(combinedEnemyDmg) + " DMG! Player blocks " + to_string(block) + " DMG.";
@@ -264,13 +249,6 @@ int main() {
                 if (enemy_poison > 0) {
                     monsterHP -= enemy_poison;
                     monsterLog += " " + monsterName + " takes " + to_string(enemy_poison) + " poison damage!";
-                }
-
-                if (enemy_regeneration > 0) {
-                    monsterHP += enemy_regeneration;
-                    if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
-                    monsterLog += " " + monsterName + " regenerates " + to_string(enemy_regeneration) + " HP!";
-                    enemy_regeneration -= 1;
                 }
             
                 if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
