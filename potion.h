@@ -68,5 +68,5 @@ inline void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int
         player_regeneration += 1;
         playerLog = "Player used Regeneration Potion, applying 1 regeneration to the player!";
     }
-
+}
 #endif
