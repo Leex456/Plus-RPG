@@ -54,7 +54,7 @@ inline void generateNextIntent() {
         }
     }
     
-    if (monsterName == "Slime") {
+    if (monsterName == "Slime") { //boss1
         if (r == 0) {   
             enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
             enemy_dmg = 3;
@@ -114,6 +114,22 @@ inline void generateNextIntent() {
         else if (r == 1) {
             enemyIntent = "Buff 1 (apply 1 Strength)";  
             enemy_strength += 1;
+
+        }
+        else {
+            enemyIntent = "Buff 3 (apply 3 Strength)";  
+            enemy_strength += 3;
+        }
+    }
+
+    if (monsterName == "Mister Big Brain") { //boss2
+        if (r == 0) {   
+            enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
+            enemy_dmg = 6;
+        }
+        else if (r == 1) {
+            enemyIntent = "Zone Out";  
+            enemy_strength += 0;
 
         }
         else {
