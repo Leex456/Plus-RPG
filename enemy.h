@@ -40,7 +40,7 @@ inline void generateNextIntent() {
     if (monsterName == "Frog") {
         if (r == 0) {   
             enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
-            enemy_dmg = 2;
+            enemy_dmg = 1;
         }
         else if (r == 1) {
             enemyIntent = "Poison (deal 1 DMG and apply 1 Poison)";  
@@ -57,7 +57,7 @@ inline void generateNextIntent() {
     if (monsterName == "Slime") {
         if (r == 0) {   
             enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
-            enemy_dmg = 3;
+            enemy_dmg = 1;
         }
         else if (r == 1) {
             enemyIntent = "Poison 2 (deal 2 DMG and apply 2 Poison)";  

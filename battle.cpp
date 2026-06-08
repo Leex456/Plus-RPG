@@ -6,6 +6,7 @@
 #include "invent.h"
 #include "enemy.h"
 #include "potion.h"
+#include "relic.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ int player_poison = 0;
 int enemy_poison = 0;
 
 int enemy_dmg = 0;
+int relic_length = 0;
 
 string monsterName = "Goblin"; // Changed default from Doctor since Doctor was removed
 string monsterLog = ""; 
@@ -36,6 +38,17 @@ int countPotions(Inventory& inv) {
         count++;
         temp = temp->next;
     }
+    return count;
+}
+
+int countRelic(Relic& rec) {
+    int count = 0;
+    RelicInv* temp = rec.head;
+    while (temp != NULL) {
+        count++;
+        temp = temp->next;
+    }
+    relic_length = count;
     return count;
 }
 
@@ -69,16 +82,15 @@ string getPotionAt(Inventory& inv, int targetIndex) {
     return "";
 }
 
-// Health bar 
-string generateHealthBar(int current, int max, int barWidth = 10) {
-    if (current < 0) current = 0;
-    int filledSegments = (current * barWidth) / max;
-    if (filledSegments == 0 && current > 0) filledSegments = 1;
-
+string generateHealthBar(int currentHP, int maxHP) {
+    int barLength = 20; 
+    int filledLength = (currentHP * barLength) / maxHP;
     string bar = "[";
-    for (int i = 0; i < barWidth; i++) {
-        if (i < filledSegments) bar += "|"; 
-        else bar += "-"; 
+    for (int i = 0; i < filledLength; i++) {
+        bar += "#";
+    }
+    for (int i = filledLength; i < barLength; i++) {
+        bar += " ";
     }
     bar += "]";
     return bar;
@@ -130,6 +142,16 @@ void displayBattleScreen() {
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
     cout << "|\n";
 
+    cout << "|  Relic: " << string(SCREEN_WIDTH - 11, ' ') << "|\n";
+
+    for (int i = 0; i < 3; i++) {
+         cout << "|  " << string(SCREEN_WIDTH - 11, ' ') << "|\n";
+    }
+
+    cout << "|";
+    for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
+    cout << "|\n";
+
     cout << "|  [Action Menu]" << string(SCREEN_WIDTH - 17, ' ') << "|\n";
     cout << "|  1. Select Potion" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
     cout << "|  2. Run Away" << string(SCREEN_WIDTH - 15, ' ') << "|\n";
@@ -138,8 +160,8 @@ void displayBattleScreen() {
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << "-";
     cout << "+\n";
 
-    cout << "PLAYER LOG: " + playerLog + "\n";
-    cout << "ENEMY LOG: " + monsterLog + "\n";
+    cout << playerLog + "\n";
+    cout << monsterLog + "\n";
     cout << "ENEMY INTENT: " + enemyIntent + "\n";
 
     cout << "+";
@@ -162,6 +184,7 @@ int main() {
         "[Weak Potion] Reduces enemy damage by 1 permanently",
         "[Poison Potion] Applies 1 poison to the enemy"
     };
+
 
     for (int i = 0; i < 3; i++) {
         bag.addItem(possiblePotions[rand() % 4]);
