@@ -1,8 +1,12 @@
+#ifndef BATTLE_H
+#define BATTLE_H
+
 #include <iostream>
 #include <string>
 #include <iomanip> 
 #include <cstdlib> 
 #include <ctime>   
+#include <conio.h>
 #include "invent.h"
 #include "enemy.h"
 #include "potion.h"
@@ -11,27 +15,33 @@
 using namespace std;
 
 // SETUP VARIABLES
-int playerHP = 20;
-int playerMaxHP = 20;
-int monsterHP = 5;
-int monsterMaxHP = 5;
+inline int playerHP = 20;
+inline int playerMaxHP = 20;
+inline int monsterHP = 5;
+inline int monsterMaxHP = 5;
 
-//STATUS VARIABLES
-int enemy_strength = 0;
-int player_strength = 0;   
-int player_poison = 0;
-int enemy_poison = 0;
+// STATUS VARIABLES
+inline int enemy_strength = 0;
+inline int player_strength = 0;   
+inline int player_poison = 0;
+inline int enemy_poison = 0;
 
-int enemy_dmg = 0;
-int relic_length = 0;
+inline int enemy_dmg = 0;
+inline int relic_length = 0;
 
-string monsterName = "Goblin"; // Changed default from Doctor since Doctor was removed
-string monsterLog = ""; 
-string playerLog = "";
-string enemyIntent = "";
+inline string monsterName = "Goblin"; 
+inline string monsterLog = ""; 
+inline string playerLog = "";
+inline string enemyIntent = "";
 
-//count inv
-int countPotions(Inventory& inv) {
+inline Inventory bag;
+
+
+void generateNextIntent();
+void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int& block);
+
+// count inv
+inline int countPotions(Inventory& inv) {
     int count = 0;
     Item* temp = inv.head;
     while (temp != NULL) {
@@ -41,7 +51,7 @@ int countPotions(Inventory& inv) {
     return count;
 }
 
-int countRelic(Relic& rec) {
+inline int countRelic(Relic& rec) {
     int count = 0;
     RelicInv* temp = rec.head;
     while (temp != NULL) {
@@ -52,8 +62,8 @@ int countRelic(Relic& rec) {
     return count;
 }
 
-//UI
-void displayNumberedPotions(Inventory& inv) {
+// UI
+inline void displayNumberedPotions(Inventory& inv) {
     Item* temp = inv.head;
     int index = 1;
     cout << "\n===============================\n";
@@ -68,8 +78,8 @@ void displayNumberedPotions(Inventory& inv) {
     cout << "===============================\n";
 }
 
-//CHOOSE POTION
-string getPotionAt(Inventory& inv, int targetIndex) {
+// CHOOSE POTION
+inline string getPotionAt(Inventory& inv, int targetIndex) {
     Item* temp = inv.head;
     int currentIndex = 1;
     while (temp != NULL) {
@@ -82,7 +92,7 @@ string getPotionAt(Inventory& inv, int targetIndex) {
     return "";
 }
 
-string generateHealthBar(int currentHP, int maxHP) {
+inline string generateHealthBar(int currentHP, int maxHP) {
     int barLength = 20; 
     int filledLength = (currentHP * barLength) / maxHP;
     string bar = "[";
@@ -97,7 +107,7 @@ string generateHealthBar(int currentHP, int maxHP) {
 }
 
 // Renders
-void displayBattleScreen() {
+inline void displayBattleScreen() {
     #ifdef _WIN32
         system("cls");  
     #else
@@ -119,39 +129,27 @@ void displayBattleScreen() {
     int spacesBetweenHP = SCREEN_WIDTH - 2 - playerHPStr.length() - monsterHPStr.length();
     cout << "|" << playerHPStr << string(spacesBetweenHP, ' ') << monsterHPStr << "|\n";
 
-    cout << "|";
-    for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
-    cout << "|\n";
+    cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
 
     string vsText = "VS";
     int vsPadding = (SCREEN_WIDTH - 2 - vsText.length()) / 2;
-    cout << "|" << string(vsPadding, ' ') << vsText << string(vsPadding, ' ');
-    if ((SCREEN_WIDTH - 2 - vsText.length()) % 2 != 0) cout << " "; 
-    cout << "|\n";
+    cout << "|" << string(vsPadding, ' ') << vsText << string(vsPadding, ' ') << "|\n";
 
-    cout << "|";
-    for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
-    cout << "|\n";
+    cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
 
-    //EFFECTS
+    // EFFECTS
     cout << "|  Status: " << string(SCREEN_WIDTH - 20, ' ') << "Status: |\n";
     cout << "|  Strength: " << player_strength << string(SCREEN_WIDTH - 26 - to_string(player_strength).length() - to_string(enemy_strength).length(), ' ') << "Strength: " << enemy_strength << "  |\n";
     cout << "|  Poison: " << player_poison << string(SCREEN_WIDTH - 22 - to_string(player_poison).length() - to_string(enemy_poison).length(), ' ') << "Poison: " << enemy_poison << "  |\n";
 
-    cout << "|";
-    for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
-    cout << "|\n";
-
+    cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
     cout << "|  Relic: " << string(SCREEN_WIDTH - 11, ' ') << "|\n";
 
     for (int i = 0; i < 3; i++) {
-         cout << "|  " << string(SCREEN_WIDTH - 11, ' ') << "|\n";
+         cout << "|  " << string(SCREEN_WIDTH - 18, ' ') << "|\n";
     }
 
-    cout << "|";
-    for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << " ";
-    cout << "|\n";
-
+    cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
     cout << "|  [Action Menu]" << string(SCREEN_WIDTH - 17, ' ') << "|\n";
     cout << "|  1. Select Potion" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
     cout << "|  2. Run Away" << string(SCREEN_WIDTH - 15, ' ') << "|\n";
@@ -169,26 +167,33 @@ void displayBattleScreen() {
     cout << "+\n";
 }
 
-int main() {
-    srand(time(0));
-    
-    //INV 
-    Inventory bag;
-    bag.addItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn");
-    bag.addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
+inline bool startBattle(string enemyType) {
+    // Setup enemy stats dynamically based on type
+    if (enemyType == "E") {
+        monsterName = "Goblin";
+        monsterHP = 5;
+        monsterMaxHP = 5;
+    } else if (enemyType == "B") {
+        monsterName = "Boss";
+        monsterHP = 20;
+        monsterMaxHP = 20;
+    } else if (enemyType == "D") {
+        monsterName = "Dragon";
+        monsterHP = 40;
+        monsterMaxHP = 40;
+    }
 
-    //add 3 random potions to inventory
+    // Reset status conditions for the new fight
+    enemy_strength = 0; player_strength = 0; player_poison = 0; enemy_poison = 0;
+    playerLog = "An enemy blocks your path!"; monsterLog = "";
+
+    
     string possiblePotions[] = {
         "[Strength Potion] Increases damage by 1 permanently",
         "[Gambling Potion] Deals 0-3 DMG randomly",
         "[Weak Potion] Reduces enemy damage by 1 permanently",
         "[Poison Potion] Applies 1 poison to the enemy"
     };
-
-
-    for (int i = 0; i < 3; i++) {
-        bag.addItem(possiblePotions[rand() % 4]);
-    }
 
     generateNextIntent();
 
@@ -198,8 +203,7 @@ int main() {
         int choice;
         
         if (!(cin >> choice)) {
-            cin.clear();
-            cin.ignore(1000, '\n');
+            cin.clear(); cin.ignore(1000, '\n');
             playerLog = "Invalid action input choice.";
             continue;
         }
@@ -211,13 +215,17 @@ int main() {
                 continue;
             }
 
+            // FIX: Instead of cleaning the entire screen with system("cls"), 
+            // we call displayBattleScreen() to overwrite the prompt line 
+            // and immediately draw the list beneath it.
+            displayBattleScreen();
+
             displayNumberedPotions(bag);
             cout << "Choose a potion number: ";
             int potChoice;
             
             if (!(cin >> potChoice)) {
-                cin.clear();
-                cin.ignore(1000, '\n');
+                cin.clear(); cin.ignore(1000, '\n');
                 playerLog = "Invalid potion input.";
                 continue;
             }
@@ -231,13 +239,9 @@ int main() {
                 string chosenPotion = getPotionAt(bag, potChoice);
                 bag.removeItem(chosenPotion); 
 
-                int dmg = 0;
-                int block = 0;
-                
-                // Call potion.h
+                int dmg = 0; int block = 0;
                 handlePotionUsage(chosenPotion, bag, dmg, block);
 
-                // Player turn damage resolution (Thorns calculation removed)
                 if (dmg > 0 || chosenPotion.find("Attack Potion") != string::npos || chosenPotion.find("Gambling Potion") != string::npos) {
                     monsterHP -= (dmg + player_strength);
                     playerLog = "Player used " + chosenPotion.substr(0, chosenPotion.find("]")+1) + ", dealing " + to_string(dmg + player_strength) + " DMG!";
@@ -248,16 +252,20 @@ int main() {
                     playerLog += " Player takes " + to_string(player_poison) + " poison damage!";
                 }
 
-                // Check WIN
                 if (monsterHP <= 0) {
-                    monsterHP = 0;
-                    monsterLog = playerLog + " " + monsterName + " was crushed!";
-                    displayBattleScreen();
-                    cout << "\nVICTORY! You defeated the monster!\n";
-                    break;
+                    #ifdef _WIN32
+                        system("cls");  
+                    #else
+                        system("clear"); 
+                    #endif
+                    cout << "\n===================================\n";
+                    cout << "  VICTORY! You defeated the monster!\n";
+                    cout << "===================================\n";
+                    cout << "Press any key to return to the world map...";
+                    _getch();
+                    return true; 
                 }
 
-                // Enemy Response Turn (Thorns reflection logic removed)
                 if (enemyIntent.find("Attack") != string::npos) {
                     int combinedEnemyDmg = enemy_dmg + enemy_strength;
                     int damageAfterBlock = combinedEnemyDmg - block;
@@ -277,10 +285,7 @@ int main() {
                 if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
 
                 if (playerHP <= 0) {
-                    playerHP = 0;
-                    displayBattleScreen();
-                    cout << "\nDEFEAT! You were beaten by the " << monsterName << ". Game Over.\n";
-                    break;
+                    return false; 
                 }
 
                 generateNextIntent(); 
@@ -289,10 +294,12 @@ int main() {
             }
         } else if (choice == 2) {
             cout << "\nYou ran away from combat!\n";
-            break;
-        } else {
-            playerLog = "Invalid selection.";
+            cout << "Press any key to continue...";
+            _getch();
+            return true; 
         }
     }
-    return 0;
+    return playerHP > 0;
 }
+
+#endif

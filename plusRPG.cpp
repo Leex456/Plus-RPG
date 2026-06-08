@@ -1,6 +1,7 @@
 #include <iostream>
 #include <conio.h>
 #include <string>
+#include "battle.h"
 
 using namespace std;
 
@@ -267,75 +268,130 @@ void displayMap()
     }
 }
 
-//detect collision with walls
+
+string generateOverworldHealthBar(int currentHP, int maxHP) {
+    if (maxHP <= 0) return "[]";
+    int barLength = 20; 
+    int filledLength = (currentHP * barLength) / maxHP;
+    if (filledLength < 0) filledLength = 0;
+    if (filledLength > barLength) filledLength = barLength;
+
+    string bar = "[";
+    for (int i = 0; i < filledLength; i++) {
+        bar += "#";
+    }
+    for (int i = filledLength; i < barLength; i++) {
+        bar += " ";
+    }
+    bar += "]";
+    return bar;
+}
+
+void displayHUD() {
+    cout << "======================================\n";
+    cout << "  HP: " << playerHP << "/" << playerMaxHP << " " 
+         << generateOverworldHealthBar(playerHP, playerMaxHP) << "\n";
+    cout << "======================================\n";
+
+    Item* current = bag.head;
+    
+    if (current == NULL) {
+        cout << "  (No potions in inventory)\n";
+    } else {
+        while (current != NULL) {
+            string originalName = current->name;
+            size_t bracketPos = originalName.find("]");
+            
+            if (bracketPos != string::npos) {
+                cout << " " << originalName.substr(0, bracketPos + 1) << "\n";
+            } else {
+                cout << " " << originalName << "\n";
+            }
+            current = current->next;
+        }
+    }
+    cout << "======================================\n";
+    cout << "  Use Arrow keys to move around map\n";
+}
+
 int collisionDetection(int x, int y)
 {
-    if(map[y][x] == "#")
-    {
-        return 1;   //collision detected
-    }
-    return 0;   //no collision
+    if(map[y][x] == "#") return 1;   
+    return 0;   
 }
 
-//handle player movement based on user input
 int playerMovement(int& posX, int& posY)
 {
-    char input;      //variable to store the user input
-    
-    while(1)
+    char input;      
+    bool gameRunning = true;
+
+    while(gameRunning)
     {
         int previousPositionX = posX, previousPositionY = posY;  
-        input = _getch();  //get the user input
+        int nextX = posX;
+        int nextY = posY;
 
-        if(input==72)
+        input = _getch();  
+
+        if(input==72) nextY--;      
+        else if(input==80) nextY++; 
+        else if(input==75) nextX--; 
+        else if(input==77) nextX++; 
+
+        if (!collisionDetection(nextX, nextY))
         {
-            if (!collisionDetection(posX, posY - 1))
+            string targetTile = map[nextY][nextX];
+
+            if (targetTile == "E" || targetTile == "B" || targetTile == "D") 
             {
-                posY--;    //move up
+                bool victory = startBattle(targetTile);
+
+                if (victory) {
+                    map[previousPositionY][previousPositionX] = " ";   
+                    posX = nextX;
+                    posY = nextY;
+                    map[posY][posX] = player;   
+                } else {
+                    console_clear_screen();
+                    cout << "\n===================================\n";
+                    cout << "   GAME OVER - YOU WERE DEFEATED   \n";
+                    cout << "===================================\n";
+                    gameRunning = false;
+                    break;
+                }
             }
-        }
-        else if(input==80)
-        {
-            if (!collisionDetection(posX, posY + 1))
+            else 
             {
-                posY++;    //move down
-            }
-        }
-        else if(input==75)
-        {
-            if (!collisionDetection(posX - 1, posY))
-            {
-                posX--;    //move left
-            }
-        }
-        else if(input==77)
-        {
-            if (!collisionDetection(posX + 1, posY))
-            {
-                posX++;    //move right
+                map[previousPositionY][previousPositionX] = ".";   
+                posX = nextX;
+                posY = nextY;
+                map[posY][posX] = player;   
             }
         }
 
-        console_clear_screen();      //clear the console screen
-        map[previousPositionY][previousPositionX] = ".";   
-        map[posY][posX] = player;   //update the player's position on the map
-        displayMap();                //display the updated map
+        if (gameRunning) {
+            console_clear_screen();      
+            displayMap();                
+            displayHUD(); // Render active UI screen updates on step loop
+        }
     }
-}
-
-//main function
-int main()
-{
-    initializeMap();
-    map[posY][posX] = player;   //put player in the map
-
-    console_clear_screen();      //clear the console screen
-    displayMap();                //display the initial map
-    playerMovement(posX, posY);   //call the player movement function
-
     return 0;
 }
 
+int main()
+{
+    initializeMap();
+    map[posY][posX] = player;  
+    bag.addItem("[Attack Potion] Deals 1 DMG");
+    bag.addItem("[Defend Potion] Block 2 DMG");
+
+    console_clear_screen();      
+    displayMap();                
+    displayHUD(); 
+    playerMovement(posX, posY);   
+
+    return 0;
+}
 
 
 

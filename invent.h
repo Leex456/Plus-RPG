@@ -17,7 +17,7 @@ void displayNumberedPotions(Inventory& inv);
 string getPotionAt(Inventory& inv, int targetIndex);
 
 class Inventory {
-private:
+public:
     Item* head;
 
 public:
@@ -104,6 +104,17 @@ public:
 
         newItem->next = current->next;
         current->next = newItem;
+    }
+
+    bool contains(string itemName) {
+        Item* temp = head;
+        while (temp != NULL) {
+            if (temp->name == itemName) {
+                return true;
+            }
+            temp = temp->next;
+        }
+        return false;
     }
 
     friend int countPotions(Inventory& inv);
