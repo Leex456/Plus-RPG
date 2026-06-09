@@ -43,14 +43,13 @@ inline void generateNextIntent() {
             enemy_dmg = 1;
         }
         else if (r == 1) {
-            enemyIntent = "Poison (deal 1 DMG and apply 1 Poison)";  
-            enemy_poison += 1;
+            enemyIntent = "Poison (deal " + to_string(1 + enemy_strength) + " DMG and apply 1 Poison)";  
+            player_poison += 1;
             enemy_dmg = 1; 
         }
         else {
-            enemyIntent = "Poison 3 (deal 3 DMG and apply 3 Poison)";  
-            enemy_poison += 3;
-            enemy_dmg = 3; 
+            enemyIntent = "Toxic (Apply 2 Poison)";  
+            player_poison += 2;
         }
     }
     
@@ -60,14 +59,14 @@ inline void generateNextIntent() {
             enemy_dmg = 1;
         }
         else if (r == 1) {
-            enemyIntent = "Poison 2 (deal 2 DMG and apply 2 Poison)";  
-            enemy_poison += 2;
+            enemyIntent = "Heavy Attack (deal " + to_string(2 + enemy_strength) + " DMG)";  
             enemy_dmg = 2; 
         }
         else {
-            enemyIntent = "Poison 5 (deal 5 DMG and apply 5 Poison)";  
-            enemy_poison += 5;
-            enemy_dmg = 5; 
+            enemyIntent = "Poison and Split (Apply 1 Poison, heal 1 HP)";  
+            player_poison += 1;
+            monsterHP += 1;
+            if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
         }
     }
 
@@ -91,18 +90,18 @@ inline void generateNextIntent() {
         if (monsterName == "Bat") {
         if (r == 0) {   
             enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
-            enemy_dmg = 2;
+            enemy_dmg = 1;
         }
         else if (r == 1) {
-            enemyIntent = "Drain 1 (deal 1 DMG and heal self for 1 HP)";  
+            enemyIntent = "Drain (deal " + to_string(1 + enemy_strength) + " DMG and heal self for 1 HP)";  
             monsterHP += 1;
             enemy_dmg = 1; 
+            if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
         }
         else {
-            enemyIntent = "Drain 3 (deal 3 DMG and heal self for 3 HP)";
+            enemyIntent = "Heavy Attack (deal " + to_string(3 + enemy_strength) + " DMG and lose 1 HP)";
             enemy_dmg = 3;
-            monsterHP += 3;
-            if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
+            monsterHP -= 1;
         }
     }
 
@@ -122,14 +121,14 @@ inline void generateNextIntent() {
         }
     }
 
-    if (monsterName == "Mister Big Brain") { //boss2
+    if (monsterName == "Mister Big Brain") {
         if (r == 0) {   
-            enemyIntent = "Attack (" + to_string(1 + enemy_strength) + " DMG)";
-            enemy_dmg = 6;
+            enemyIntent = "Attack (" + to_string(3 + enemy_strength) + " DMG)";
+            enemy_dmg = 3;
         }
         else if (r == 1) {
-            enemyIntent = "Zone Out";  
-            enemy_strength += 0;
+            enemyIntent = "Control (reduce player Strength to 0)";  
+            player_strength = 0;
 
         }
         else {

@@ -116,6 +116,17 @@ public:
         return count;
     }
 
+    bool contains(string itemName) {
+        RelicInv* temp = head;
+        while (temp != NULL) {
+            if (temp->name == itemName) {
+                return true;
+            }
+            temp = temp->next;
+        }
+        return false;
+    }
+
     friend int countRelic(Relic& rec);
     friend void displayNumberedRelic(Relic& rec);
     friend string getRelicAt(Relic& rec, int targetIndex);

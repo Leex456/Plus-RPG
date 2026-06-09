@@ -39,7 +39,7 @@ public:
             }
             temp->next = newItem;
         }
-        cout << itemName << " added!\n";
+        cout << itemName << " \n";
     }
 
     void showInventory() {

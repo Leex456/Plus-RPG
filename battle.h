@@ -35,6 +35,7 @@ inline string playerLog = "";
 inline string enemyIntent = "";
 
 inline Inventory bag;
+inline Relic relic;
 
 
 void generateNextIntent();
@@ -76,6 +77,16 @@ inline void displayNumberedPotions(Inventory& inv) {
     }
     cout << "  " << index << ". [Back to Action Menu]\n";
     cout << "===============================\n";
+}
+
+inline void displayNumberedRelic(Relic& rec) {
+    RelicInv* temp = rec.head;
+    int index = 1;
+    while (temp != NULL) {
+        cout << "|  " << temp->name << string(96 - temp->name.length(), ' ') << "|\n";
+        index++;
+        temp = temp->next;
+    }
 }
 
 // CHOOSE POTION
@@ -145,9 +156,7 @@ inline void displayBattleScreen() {
     cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
     cout << "|  Relic: " << string(SCREEN_WIDTH - 11, ' ') << "|\n";
 
-    for (int i = 0; i < 3; i++) {
-         cout << "|  " << string(SCREEN_WIDTH - 18, ' ') << "|\n";
-    }
+    displayNumberedRelic(relic);
 
     cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
     cout << "|  [Action Menu]" << string(SCREEN_WIDTH - 17, ' ') << "|\n";
@@ -167,14 +176,23 @@ inline void displayBattleScreen() {
     cout << "+\n";
 }
 
+
+// MAIN
+
+
 inline bool startBattle(string enemyType) {
-    // Setup enemy stats dynamically based on type
+
+    int potiondrop = 0;
+    int relicdrop = 0;
+
     if (enemyType == "E") {
-        monsterName = "Goblin";
-        monsterHP = 5;
-        monsterMaxHP = 5;
+        string monsterlist[] = {"Goblin", "Frog", "Slime", "Gambler", "Bat", "Porcupine"};
+        monsterName = monsterlist[rand() % 6];
+        monsterHP = 6;
+        monsterMaxHP = 6;
     } else if (enemyType == "B") {
-        monsterName = "Boss";
+        string bosslist[] = {"Mister Big Brain"};
+        monsterName = bosslist[rand() % 1];
         monsterHP = 20;
         monsterMaxHP = 20;
     } else if (enemyType == "D") {
@@ -187,12 +205,24 @@ inline bool startBattle(string enemyType) {
     enemy_strength = 0; player_strength = 0; player_poison = 0; enemy_poison = 0;
     playerLog = "An enemy blocks your path!"; monsterLog = "";
 
+
+    if (relic.contains("[Ring of Strength] +1 Strength")) {
+        player_strength += 1;
+    }
+    if (relic.contains("[Toxic Bottle] Enemy start with 1 poison")) {
+        enemy_poison += 1;
+    }
+
     
-    string possiblePotions[] = {
+    string PotionList[] = {
         "[Strength Potion] Increases damage by 1 permanently",
         "[Gambling Potion] Deals 0-3 DMG randomly",
         "[Weak Potion] Reduces enemy damage by 1 permanently",
         "[Poison Potion] Applies 1 poison to the enemy"
+    };
+    string RelicList[] = {
+        "[Ring of Strength] +1 Strength",
+        "[Toxic Bottle] Enemy start with 1 poison",
     };
 
     generateNextIntent();
@@ -215,9 +245,6 @@ inline bool startBattle(string enemyType) {
                 continue;
             }
 
-            // FIX: Instead of cleaning the entire screen with system("cls"), 
-            // we call displayBattleScreen() to overwrite the prompt line 
-            // and immediately draw the list beneath it.
             displayBattleScreen();
 
             displayNumberedPotions(bag);
@@ -258,6 +285,34 @@ inline bool startBattle(string enemyType) {
                     #else
                         system("clear"); 
                     #endif
+
+                    if (enemyType == "E") {
+                        potiondrop = 2;
+                        relicdrop = 0;
+                    }
+                    else if (enemyType == "B") {
+                        potiondrop = 4;
+                        relicdrop = 1;
+                    }
+                    else if (enemyType == "D") {
+                        potiondrop = 6;
+                        relicdrop = 1;
+                    }
+
+
+                    cout << "===============LOOTS===============\n" << endl;
+                    for (int i = 0; i < potiondrop; i++) {
+                        string addPotion = PotionList[rand() % 4];
+                        bag.addItem(addPotion);
+                    }
+                    for (int i = 0; i < relicdrop; i++) {
+                        string addRelic = RelicList[rand() % 2];
+                        if (!relic.contains(addRelic)) {
+                            relic.addItem(addRelic);
+                        }
+                    }
+
+
                     cout << "\n===================================\n";
                     cout << "  VICTORY! You defeated the monster!\n";
                     cout << "===================================\n";

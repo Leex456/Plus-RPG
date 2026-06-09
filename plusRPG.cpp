@@ -382,8 +382,8 @@ int main()
 {
     initializeMap();
     map[posY][posX] = player;  
-    bag.addItem("[Attack Potion] Deals 1 DMG");
-    bag.addItem("[Defend Potion] Block 2 DMG");
+    bag.addItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn");
+    bag.addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
 
     console_clear_screen();      
     displayMap();                
