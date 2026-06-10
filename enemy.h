@@ -127,13 +127,30 @@ inline void generateNextIntent() {
             enemy_dmg = 3;
         }
         else if (r == 1) {
-            enemyIntent = "Control (reduce player Strength to 0)";  
-            player_strength = 0;
+            enemyIntent = "Kill Myself (deal 10 DMG to self)";  
+            monsterHP -= 10;
 
         }
         else {
             enemyIntent = "Buff 3 (apply 3 Strength)";  
             enemy_strength += 3;
+        }
+    }
+
+    if (monsterName == "Dragon") {
+        if (r == 0) {   
+            enemyIntent = "Attack (" + to_string(4 + enemy_strength) + " DMG)";
+            enemy_dmg = 4;
+        }
+        else if (r == 1) {
+            enemyIntent = "Fire Breath (deal 2 DMG and apply 2 Poison)";  
+            player_poison += 2;
+            enemy_dmg = 2; 
+        }
+        else {
+            enemyIntent = "Tail Swipe (deal 3 DMG and reduce player strength by 1)";  
+            player_strength -= 1;
+            enemy_dmg = 3; 
         }
     }
 
