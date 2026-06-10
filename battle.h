@@ -351,6 +351,12 @@ inline bool startBattle(string enemyType) {
                 if (relic.contains("[Potion Satchel] Enemy drop 1 extra potion")) {
                     potiondrop += 1;
                 }
+                if (relic.contains("[The Destruction] Heal 25% HP at the end of each fight, and raise max HP by 1")) {
+                        playerMaxHP += 1;    
+                        playerHP += playerMaxHP * 0.25;
+                        if (playerHP > playerMaxHP) playerHP = playerMaxHP;
+                        
+                }
 
                 cout << "===============LOOTS===============\n" << endl;
                 uniform_int_distribution<int> potDist(0, 12);
