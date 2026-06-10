@@ -212,21 +212,55 @@ inline bool startBattle(string enemyType) {
     if (relic.contains("[Toxic Bottle] Enemy start with 1 poison")) {
         enemy_poison += 1;
     }
+    if (relic.contains("[Healing Charm] Heal 1 HP at the start of each fight")) {
+        playerHP += 1;
+        if (playerHP > playerMaxHP) playerHP = playerMaxHP;
+    }
+    if (relic.contains("[Art of War] Boss enemies start with 25% less HP")) {
+        if (enemyType == "B") {
+            monsterHP = monsterHP * 0.75;
+            monsterMaxHP = monsterMaxHP * 0.75;
+        }
+    }
+    if (relic.contains("[Weakening Charm] Enemy start with 1 less Strength")) {
+        enemy_strength -= 1;
+    }
+    if (relic.contains("[Charged Amulet] Player starts with 2 Strength, Enemy start with 1 strength")) {
+        player_strength += 2;
+        enemy_strength += 1;
+    }
+
+    
 
     
     string PotionList[] = {
-        "[Strength Potion] Increases damage by 1 permanently",
+        "[Strength Potion] Increases damage by 2 permanently",
         "[Gambling Potion] Deals 0-3 DMG randomly",
-        "[Weak Potion] Reduces enemy damage by 1 permanently",
-        "[Poison Potion] Applies 1 poison to the enemy"
+        "[Weak Potion] Reduces enemy damage by 2 permanently",
+        "[Poison Potion] Applies 1 poison to the enemy",
+        "[Damage Potion] Deals 3 DMG",
+        "[Heal Potion] Heals 5 HP",
+        "[Reckless Potion] Deals 5 DMG and take 1 damage",
+        "[Block Potion] Block 5 DMG",
+        "[Rush Potion] Block 2 DMG and deal 2 DMG",
+        "[Toxic Potion] Apply 4 poison to the enemy, also apply 1 poison to self",
+        "[Overgrowth Potion] Increase damage by 4, also take 1 damage",
+        "[Purify Potion] Remove all enemy strength and player poison",
+        "[Growth Potion] Increase max HP by 1",
     };
     string RelicList[] = {
-        "[Ring of Strength] +1 Strength",
+        "[Ring of Strength] Player starts with 1 Strength",
         "[Toxic Bottle] Enemy start with 1 poison",
+        "[Healing Charm] Heal 1 HP at the start of each fight",
+        "[Art of War] Boss enemies start with 25% less HP",
+        "[Potion Satchel] Enemy drop 1 extra potion",
+        "[Weakening Charm] Enemy start with 1 less Strength",
+        "[Charged Amulet] Player starts with 2 Strength, Enemy start with 1 strength",
+        "[Scary Mask] Run away will gain you 1 HP",
     };
 
     generateNextIntent();
-
+    
     while (playerHP > 0 && monsterHP > 0) {
         displayBattleScreen();
         cout << "Choose action (1: Select Potion, 2: Run Away): ";
@@ -299,14 +333,17 @@ inline bool startBattle(string enemyType) {
                         relicdrop = 1;
                     }
 
+                    if (relic.contains("[Potion Satchel] Enemy drop 1 extra potion")) {
+                        potiondrop += 1;
+                    }
 
                     cout << "===============LOOTS===============\n" << endl;
                     for (int i = 0; i < potiondrop; i++) {
-                        string addPotion = PotionList[rand() % 4];
+                        string addPotion = PotionList[rand() % 11];
                         bag.addItem(addPotion);
                     }
                     for (int i = 0; i < relicdrop; i++) {
-                        string addRelic = RelicList[rand() % 2];
+                        string addRelic = RelicList[rand() % 8];
                         if (!relic.contains(addRelic)) {
                             relic.addItem(addRelic);
                         }
@@ -349,6 +386,13 @@ inline bool startBattle(string enemyType) {
             }
         } else if (choice == 2) {
             cout << "\nYou ran away from combat!\n";
+
+            if (relic.contains("[Scary Mask] Run away will gain you 1 HP")) {
+                playerHP += 1;
+                if (playerHP > playerMaxHP) playerHP = playerMaxHP;
+                cout << "But the Scary Mask grants you 1 HP for running away...\n";
+            }
+
             cout << "Press any key to continue...";
             _getch();
             return true; 
