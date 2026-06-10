@@ -11,6 +11,7 @@
 #include "enemy.h"
 #include "potion.h"
 #include "relic.h"
+#include <random>
 
 using namespace std;
 
@@ -36,7 +37,6 @@ inline string enemyIntent = "";
 
 inline Inventory bag;
 inline Relic relic;
-
 
 void generateNextIntent();
 void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int& block);
@@ -118,7 +118,7 @@ inline string generateHealthBar(int currentHP, int maxHP) {
 }
 
 // Renders
-inline void displayBattleScreen() {
+inline void displayBattleScreen(bool canRunAway) {
     #ifdef _WIN32
         system("cls");  
     #else
@@ -161,7 +161,12 @@ inline void displayBattleScreen() {
     cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
     cout << "|  [Action Menu]" << string(SCREEN_WIDTH - 17, ' ') << "|\n";
     cout << "|  1. Select Potion" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
-    cout << "|  2. Run Away" << string(SCREEN_WIDTH - 15, ' ') << "|\n";
+    
+    if (canRunAway) {
+        cout << "|  2. Run Away" << string(SCREEN_WIDTH - 15, ' ') << "|\n";
+    } else {
+        cout << "|  [RETREAT LOCKED]" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
+    }
 
     cout << "+";
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << "-";
@@ -176,23 +181,26 @@ inline void displayBattleScreen() {
     cout << "+\n";
 }
 
-
 // MAIN
-
-
 inline bool startBattle(string enemyType) {
+
+    random_device rd;
+    mt19937 gen(rd());
 
     int potiondrop = 0;
     int relicdrop = 0;
+    bool interactionOccurred = false; // Tracks if player has locked in combat yet
 
     if (enemyType == "E") {
         string monsterlist[] = {"Goblin", "Frog", "Slime", "Gambler", "Bat", "Porcupine"};
-        monsterName = monsterlist[rand() % 6];
+        uniform_int_distribution<int> dist(0, 5);
+        monsterName = monsterlist[dist(gen)];
         monsterHP = 6;
         monsterMaxHP = 6;
     } else if (enemyType == "B") {
         string bosslist[] = {"Mister Big Brain"};
-        monsterName = bosslist[rand() % 1];
+        uniform_int_distribution<int> dist(0, 0);
+        monsterName = bosslist[dist(gen)];
         monsterHP = 20;
         monsterMaxHP = 20;
     } else if (enemyType == "D") {
@@ -204,7 +212,6 @@ inline bool startBattle(string enemyType) {
     // Reset status conditions for the new fight
     enemy_strength = 0; player_strength = 0; player_poison = 0; enemy_poison = 0;
     playerLog = "An enemy blocks your path!"; monsterLog = "";
-
 
     if (relic.contains("[Ring of Strength] +1 Strength")) {
         player_strength += 1;
@@ -230,9 +237,6 @@ inline bool startBattle(string enemyType) {
         enemy_strength += 1;
     }
 
-    
-
-    
     string PotionList[] = {
         "[Strength Potion] Increases damage by 2 permanently",
         "[Gambling Potion] Deals 0-3 DMG randomly",
@@ -262,140 +266,139 @@ inline bool startBattle(string enemyType) {
     generateNextIntent();
     
     while (playerHP > 0 && monsterHP > 0) {
-        displayBattleScreen();
-        cout << "Choose action (1: Select Potion, 2: Run Away): ";
-        int choice;
+        // Can run away ONLY if it's not a dragon AND no potion has been used yet
+        bool canRunAway = (enemyType != "D") && (!interactionOccurred);
+
+        displayBattleScreen(canRunAway);
         
-        if (!(cin >> choice)) {
+        // Directly display the dynamic list inside the action block frame with no exit option
+        displayNumberedPotions(bag);
+
+        if (canRunAway) {
+            cout << "Choose a Potion Number to use (or enter 99 to Run Away): ";
+        } else {
+            cout << "Choose a Potion Number to use [Run Locked]: ";
+        }
+
+        int potChoice;
+        if (!(cin >> potChoice)) {
             cin.clear(); cin.ignore(1000, '\n');
-            playerLog = "Invalid action input choice.";
+            playerLog = "Invalid numeric input configuration.";
             continue;
         }
 
-        if (choice == 1) {
-            int totalPotions = countPotions(bag);
-            if (totalPotions == 0) {
-                playerLog = "Your inventory is empty!";
-                continue;
-            }
+        // Handle escape routing cleanly via an override variable value
+        if (potChoice == 99) {
+            if (canRunAway) {
+                cout << "\nYou ran away from combat!\n";
 
-            displayBattleScreen();
-
-            displayNumberedPotions(bag);
-            cout << "Choose a potion number: ";
-            int potChoice;
-            
-            if (!(cin >> potChoice)) {
-                cin.clear(); cin.ignore(1000, '\n');
-                playerLog = "Invalid potion input.";
-                continue;
-            }
-
-            if (potChoice == totalPotions + 1) {
-                playerLog = "Returned to primary menu.";
-                continue;
-            }
-
-            if (potChoice >= 1 && potChoice <= totalPotions) {
-                string chosenPotion = getPotionAt(bag, potChoice);
-                bag.removeItem(chosenPotion); 
-
-                int dmg = 0; int block = 0;
-                handlePotionUsage(chosenPotion, bag, dmg, block);
-
-                if (dmg > 0 || chosenPotion.find("Attack Potion") != string::npos || chosenPotion.find("Gambling Potion") != string::npos) {
-                    monsterHP -= (dmg + player_strength);
-                    playerLog = "Player used " + chosenPotion.substr(0, chosenPotion.find("]")+1) + ", dealing " + to_string(dmg + player_strength) + " DMG!";
+                if (relic.contains("[Scary Mask] Run away will gain you 1 HP")) {
+                    playerHP += 1;
+                    if (playerHP > playerMaxHP) playerHP = playerMaxHP;
+                    cout << "But the Scary Mask grants you 1 HP for running away...\n";
                 }
 
-                if (player_poison > 0) {
-                    playerHP -= player_poison;
-                    playerLog += " Player takes " + to_string(player_poison) + " poison damage!";
-                }
-
-                if (monsterHP <= 0) {
-                    #ifdef _WIN32
-                        system("cls");  
-                    #else
-                        system("clear"); 
-                    #endif
-
-                    if (enemyType == "E") {
-                        potiondrop = 2;
-                        relicdrop = 0;
-                    }
-                    else if (enemyType == "B") {
-                        potiondrop = 4;
-                        relicdrop = 1;
-                    }
-                    else if (enemyType == "D") {
-                        potiondrop = 6;
-                        relicdrop = 1;
-                    }
-
-                    if (relic.contains("[Potion Satchel] Enemy drop 1 extra potion")) {
-                        potiondrop += 1;
-                    }
-
-                    cout << "===============LOOTS===============\n" << endl;
-                    for (int i = 0; i < potiondrop; i++) {
-                        string addPotion = PotionList[rand() % 11];
-                        bag.addItem(addPotion);
-                    }
-                    for (int i = 0; i < relicdrop; i++) {
-                        string addRelic = RelicList[rand() % 8];
-                        if (!relic.contains(addRelic)) {
-                            relic.addItem(addRelic);
-                        }
-                    }
-
-
-                    cout << "\n===================================\n";
-                    cout << "  VICTORY! You defeated the monster!\n";
-                    cout << "===================================\n";
-                    cout << "Press any key to return to the world map...";
-                    _getch();
-                    return true; 
-                }
-
-                if (enemyIntent.find("Attack") != string::npos) {
-                    int combinedEnemyDmg = enemy_dmg + enemy_strength;
-                    int damageAfterBlock = combinedEnemyDmg - block;
-                    if (damageAfterBlock < 0) damageAfterBlock = 0;
-                    playerHP -= damageAfterBlock;
-                    monsterLog = monsterName + " attacks for " + to_string(combinedEnemyDmg) + " DMG! Player blocks " + to_string(block) + " DMG.";
-                }
-                else if (enemyIntent.find("Buff") != string::npos) {
-                    monsterLog = monsterName + " buffs itself";
-                }
-
-                if (enemy_poison > 0) {
-                    monsterHP -= enemy_poison;
-                    monsterLog += " " + monsterName + " takes " + to_string(enemy_poison) + " poison damage!";
-                }
-            
-                if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
-
-                if (playerHP <= 0) {
-                    return false; 
-                }
-
-                generateNextIntent(); 
+                cout << "Press any key to continue...";
+                _getch();
+                return true; 
             } else {
-                playerLog = "Out of range choice allocation selected.";
+                playerLog = "Retreat is impossible now!";
+                continue;
             }
-        } else if (choice == 2) {
-            cout << "\nYou ran away from combat!\n";
+        }
 
-            if (relic.contains("[Scary Mask] Run away will gain you 1 HP")) {
-                playerHP += 1;
-                if (playerHP > playerMaxHP) playerHP = playerMaxHP;
-                cout << "But the Scary Mask grants you 1 HP for running away...\n";
+        int totalPotions = countPotions(bag);
+        if (potChoice >= 1 && potChoice <= totalPotions) {
+            // A valid potion item execution drops running capabilities permanently
+            interactionOccurred = true;
+
+            string chosenPotion = getPotionAt(bag, potChoice);
+            bag.removeItem(chosenPotion); 
+
+            int dmg = 0; int block = 0;
+            handlePotionUsage(chosenPotion, bag, dmg, block);
+
+            if (dmg > 0 || chosenPotion.find("Attack Potion") != string::npos || chosenPotion.find("Gambling Potion") != string::npos) {
+                monsterHP -= (dmg + player_strength);
+                playerLog = "Player used " + chosenPotion.substr(0, chosenPotion.find("]")+1) + ", dealing " + to_string(dmg + player_strength) + " DMG!";
             }
 
-            cout << "Press any key to continue...";
-            _getch();
-            return true; 
+            if (player_poison > 0) {
+                playerHP -= player_poison;
+                playerLog += " Player takes " + to_string(player_poison) + " poison damage!";
+            }
+
+            if (monsterHP <= 0) {
+                #ifdef _WIN32
+                    system("cls");  
+                #else
+                    system("clear"); 
+                #endif
+
+                if (enemyType == "E") {
+                    potiondrop = 2;
+                    relicdrop = 0;
+                }
+                else if (enemyType == "B") {
+                    potiondrop = 4;
+                    relicdrop = 1;
+                }
+                else if (enemyType == "D") {
+                    potiondrop = 6;
+                    relicdrop = 1;
+                }
+
+                if (relic.contains("[Potion Satchel] Enemy drop 1 extra potion")) {
+                    potiondrop += 1;
+                }
+
+                cout << "===============LOOTS===============\n" << endl;
+                uniform_int_distribution<int> potDist(0, 12);
+                for (int i = 0; i < potiondrop; i++) {
+                    string addPotion = PotionList[potDist(gen)];
+                    bag.addItem(addPotion);
+                }
+                uniform_int_distribution<int> relicDist(0, 7);
+                for (int i = 0; i < relicdrop; i++) {
+                    string addRelic = RelicList[relicDist(gen)];
+                    if (!relic.contains(addRelic)) {
+                        relic.addItem(addRelic);
+                    }
+                }
+
+                cout << "\n===================================\n";
+                cout << "  VICTORY! You defeated the monster!\n";
+                cout << "===================================\n";
+                cout << "Press any key to return to the world map...";
+                _getch();
+                return true; 
+            }
+
+            if (enemyIntent.find("Attack") != string::npos) {
+                int combinedEnemyDmg = enemy_dmg + enemy_strength;
+                int damageAfterBlock = combinedEnemyDmg - block;
+                if (damageAfterBlock < 0) damageAfterBlock = 0;
+                playerHP -= damageAfterBlock;
+                monsterLog = monsterName + " attacks for " + to_string(combinedEnemyDmg) + " DMG! Player blocks " + to_string(block) + " DMG.";
+            }
+            else if (enemyIntent.find("Buff") != string::npos) {
+                monsterLog = monsterName + " buffs itself";
+            }
+
+            if (enemy_poison > 0) {
+                monsterHP -= enemy_poison;
+                monsterLog += " " + monsterName + " takes " + to_string(enemy_poison) + " poison damage!";
+            }
+        
+            if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
+
+            if (playerHP <= 0) {
+                return false; 
+            }
+
+            generateNextIntent(); 
+        } else {
+            playerLog = "Out of range choice allocation selected.";
         }
     }
     return playerHP > 0;
