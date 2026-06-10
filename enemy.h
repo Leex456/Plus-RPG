@@ -137,6 +137,38 @@ inline void generateNextIntent() {
         }
     }
 
+    if (monsterName == "Beeg Cat") {
+        if (r == 0) {   
+            enemyIntent = "Attack (" + to_string(3 + enemy_strength) + " DMG)";
+            enemy_dmg = 3;
+        }
+        else if (r == 1) {
+            enemyIntent = "Double Attack (deal 5 DMG to player twice)";  
+            enemy_dmg = 5;
+            enemy_dmg += 5;
+
+        }
+        else {
+            enemyIntent = "Buff (apply 2 Strength)";  
+            enemy_strength += 2;
+        }
+    }
+
+    if (monsterName == "Magician") {
+        if (r == 0) {   
+            enemyIntent = "Fire Magic (" + to_string(3 + enemy_strength) + " DMG)";
+            enemy_dmg = 3;
+        }
+        else if (r == 1) {
+            enemyIntent = "Silence Magic (reduce player strength to 0)";  
+            player_strength = 0;
+        }
+        else {
+            enemyIntent = "Enhance Magic (apply 2 Strength)";  
+            enemy_strength += 2;
+        }
+    }
+
     if (monsterName == "Dragon") {
         if (r == 0) {   
             enemyIntent = "Attack (" + to_string(2 + enemy_strength) + " DMG)";

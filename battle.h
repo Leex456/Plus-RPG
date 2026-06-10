@@ -198,8 +198,8 @@ inline bool startBattle(string enemyType) {
         monsterHP = 6;
         monsterMaxHP = 6;
     } else if (enemyType == "B") {
-        string bosslist[] = {"Mister Big Brain"};
-        uniform_int_distribution<int> dist(0, 0);
+        string bosslist[] = {"Mister Big Brain", "Beeg Cat", "Magician"};
+        uniform_int_distribution<int> dist(0, 2);
         monsterName = bosslist[dist(gen)];
         monsterHP = 20;
         monsterMaxHP = 20;
@@ -236,6 +236,26 @@ inline bool startBattle(string enemyType) {
         player_strength += 2;
         enemy_strength += 1;
     }
+    if (relic.contains("[Art of War] Boss enemies start with 25% less HP")) {
+        if (enemyType == "B") {
+            monsterHP = monsterHP * 0.75;
+            monsterMaxHP = monsterMaxHP * 0.75;
+        }
+    }
+    if (relic.contains("[Scary Mask] Run away will gain you 1 HP")) {
+        playerLog += " The Scary Mask grants you 1 HP for this fight...\n";
+        playerHP += 1;
+        if (playerHP > playerMaxHP) playerHP = playerMaxHP;
+    }
+    if (relic.contains("[Dragon Scale] Reduce dragon attack damage by 1")) {
+        if (enemyType == "D") {
+            enemy_dmg -= 1;
+        }
+    }
+    if (relic.contains("[First Strike] Deal 3 DMG at the start of combat")) {
+        monsterHP -= 3;
+        playerLog += " The First Strike relic deals 3 DMG to the enemy at the start of combat!\n";
+    }
 
     string PotionList[] = {
         "[Strength Potion] Increases damage by 2 permanently",
@@ -261,6 +281,8 @@ inline bool startBattle(string enemyType) {
         "[Weakening Charm] Enemy start with 1 less Strength",
         "[Charged Amulet] Player starts with 2 Strength, Enemy start with 1 strength",
         "[Scary Mask] Run away will gain you 1 HP",
+        "[Dragon Scale] Reduce dragon attack damage by 1",
+        "[First Strike] Deal 3 DMG at the start of combat",
     };
 
     generateNextIntent();

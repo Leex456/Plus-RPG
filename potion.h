@@ -88,7 +88,10 @@ inline void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int
         playerLog = "Player used Growth Potion, increasing max HP by 1!";
         playerMaxHP += 1;
         playerHP += 1;
-    }
+
+    }  
+
+
 
 
 
