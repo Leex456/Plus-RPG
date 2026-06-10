@@ -378,6 +378,26 @@ int playerMovement(int& posX, int& posY)
     return 0;
 }
 
+void mainMenu()
+{
+    string line1 = R"(  _____       _      _____      _   _              _____                      )"; 
+    string line2 = R"( |  __ \     | |    |  __ \    | | (_)            / ____|                     )";
+    string line3 = R"( | |__) |___ | | ___| |__) |__ | |_ _  ___  _ __ | |  __  __ _ _ __ ___   ___ )";
+    string line4 = R"( |  _  // _ \| |/ _ \  ___/ _ \| __| |/ _ \| '_ \| | |_ |/ _` | '_ ` _ \ / _ \)";
+    string line5 = R"( | | \ \ (_) | |  __/ |  | (_) | |_| | (_) | | | | |__| | (_| | | | | | |  __/)";
+    string line6 = R"( |_|  \_\___/|_|\___|_|   \___/ \__|_|\___/|_| |_|\_____|\__,_|_| |_| |_|\___|)";
+
+    cout << line1 << endl;
+    cout << line2 << endl;
+    cout << line3 << endl;
+    cout << line4 << endl;
+    cout << line5 << endl;
+    cout << line6 << endl << endl;
+
+    cout << "Press Enter to Start!\n";
+    cin.get();
+}
+
 int main()
 {
     initializeMap();
@@ -386,6 +406,7 @@ int main()
     bag.addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
     relic.addItem("[The Destruction] Heal 25% HP at the end of each fight, and raise max HP by 1");
 
+    mainMenu();
     console_clear_screen();      
     displayMap();                
     displayHUD(); 
