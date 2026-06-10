@@ -127,9 +127,15 @@ inline void generateNextIntent() {
             enemy_dmg = 3;
         }
         else if (r == 1) {
+<<<<<<< HEAD
             enemyIntent = "Kill Myself (deal 10 DMG to self)";  
             monsterHP -= 10;
 
+=======
+            enemyIntent = "Self Destruct (deal 5 DMG to self, deal 5 DMG to player)";  
+            enemy_dmg = 5;
+            monsterHP -= 5;
+>>>>>>> 08bfdd27becee9c3ad70c0a982bb6b59aaf4fe7a
         }
         else {
             enemyIntent = "Buff 3 (apply 3 Strength)";  
@@ -139,6 +145,7 @@ inline void generateNextIntent() {
 
     if (monsterName == "Dragon") {
         if (r == 0) {   
+<<<<<<< HEAD
             enemyIntent = "Attack (" + to_string(4 + enemy_strength) + " DMG)";
             enemy_dmg = 4;
         }
@@ -153,6 +160,22 @@ inline void generateNextIntent() {
             enemy_dmg = 3; 
         }
     }
+=======
+            enemyIntent = "Attack (" + to_string(2 + enemy_strength) + " DMG)";
+            enemy_dmg = 2;
+        }
+        else if (r == 1) {
+            enemyIntent = "Harden Scales (apply 1 Strength and Heal 2 DMG)";  
+            enemy_strength += 1;
+            monsterHP += 2;
+            if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
+        }
+        else {
+            enemyIntent = "Fire Breath (deal " + to_string(4 + enemy_strength) + " DMG and apply 2 Poison)"; 
+            enemy_dmg = 4; 
+            player_poison += 2;
+        }
+>>>>>>> 08bfdd27becee9c3ad70c0a982bb6b59aaf4fe7a
 
 }
 #endif
