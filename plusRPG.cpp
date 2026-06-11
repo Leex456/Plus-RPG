@@ -7,7 +7,7 @@ using namespace std;
 
 //global variables
 string player = "@";
-int posX=27, posY=50;   //initial position of the player
+int posX=27, posY=50;   //starting position
 
 void console_clear_screen() 
 {
@@ -16,7 +16,7 @@ void console_clear_screen()
 
 string map[54][54];
 
-//generate the map
+//map
 void initializeMap() 
 {
     for (int i = 0; i < 54; i++) 
@@ -138,136 +138,62 @@ void initializeMap()
     } map[16][45] = "."; map[25][45] = ".";  map[35][45] = ".";  map[41][45] = "."; map[42][45] = ".";
 
     //enemies
-    map[8][5] = "E";
-    map[10][8] = "E";
-    map[5][19] = "E";
-    map[10][17] = "E";
-    map[17][18] = "E";
-    map[18][13] = "E";
-    map[15][6] = "E";
-    map[17][24] = "E";
-    map[7][26] = "E";
-    map[11][29] = "E";
-    map[6][35] = "E";
-    map[16][35] = "E";
-    map[19][42] = "E";
-    map[10][45] = "E";
-    map[6][46] = "E";
-    map[4][49] = "E";
-    map[10][49] = "E";
-    map[16][49] = "E";
-    map[24][4] = "E";
-    map[36][4] = "E";
-    map[47][4] = "E";
-    map[29][7] = "E";
-    map[49][7] = "E";
-    map[42][9] = "E";
-    map[34][10] = "E";
-    map[26][13] = "E";
-    map[37][14] = "E";
-    map[46][15] = "E";
-    map[42][17] = "E";
-    map[48][19] = "E";
-    map[28][20] = "E";
-    map[36][22] = "E";
-    map[47][23] = "E";
-    map[46][27] = "E";
-    map[41][27] = "E";
-    map[36][27] = "E";
-    map[34][32] = "E";
-    map[48][32] = "E";
-    map[25][36] = "E";
-    map[37][38] = "E";
-    map[43][38] = "E";
-    map[30][39] = "E";
-    map[45][42] = "E";
-    map[28][48] = "E";
-    map[33][50] = "E";
-    map[45][50] = "E";
+    map[8][5] = "E"; map[10][8] = "E"; map[5][19] = "E"; map[10][17] = "E";
+    map[17][18] = "E"; map[18][13] = "E"; map[15][6] = "E"; map[17][24] = "E";
+    map[7][26] = "E"; map[11][29] = "E"; map[6][35] = "E"; map[16][35] = "E";
+    map[19][42] = "E"; map[10][45] = "E"; map[6][46] = "E"; map[4][49] = "E";
+    map[10][49] = "E"; map[16][49] = "E"; map[24][4] = "E"; map[36][4] = "E";
+    map[47][4] = "E"; map[29][7] = "E"; map[49][7] = "E"; map[42][9] = "E";
+    map[34][10] = "E"; map[26][13] = "E"; map[37][14] = "E"; map[46][15] = "E";
+    map[42][17] = "E"; map[48][19] = "E"; map[28][20] = "E"; map[36][22] = "E";
+    map[47][23] = "E"; map[46][27] = "E"; map[41][27] = "E"; map[36][27] = "E";
+    map[34][32] = "E"; map[48][32] = "E"; map[25][36] = "E"; map[37][38] = "E";
+    map[43][38] = "E"; map[30][39] = "E"; map[45][42] = "E"; map[28][48] = "E";
+    map[33][50] = "E"; map[45][50] = "E";
 
     //bosses
-    map[4][10] = "B";
-    map[42][3] = "B";
-    map[7][50] = "B";
-    map[49][47] = "B";
+    map[4][10] = "B"; map[42][3] = "B"; map[7][50] = "B"; map[49][47] = "B";
     map[27][27] = "D";
-
 }
 
-void borderPrint()
-{
-    for(int i = 0; i < 5; i++)
-    {
-        cout << "_____________";
-    }
-}
-
-//display only in a 5x5 area around the player with a border
 void displayMap() 
 {
-    int startY = posY - 2;
-    int startX = posX - 2;
-    
-    const int CONTENT_WIDTH = 5;
-    const int CONTENT_HEIGHT = 5;
-    const int HORIZONTAL_SPACING = 3;
-    const int VERTICAL_SPACING = 2;
+    int startY = posY - 2; int startX = posX - 2;
+    const int CONTENT_WIDTH = 5; const int CONTENT_HEIGHT = 5;
+    const int HORIZONTAL_SPACING = 3; const int VERTICAL_SPACING = 2;
     
     int totalWidth = CONTENT_WIDTH + (HORIZONTAL_SPACING * 2);
     int totalHeight = CONTENT_HEIGHT + (VERTICAL_SPACING * 2);
     
-    // Create a 2D array to hold the framed content
     string frame[totalHeight][totalWidth];
-    
-    // Initialize frame with spaces
     for (int i = 0; i < totalHeight; i++) {
-        for (int j = 0; j < totalWidth; j++) {
-            frame[i][j] = " ";
-        }
+        for (int j = 0; j < totalWidth; j++) frame[i][j] = " ";
     }
     
-    // Place the map content in the center of the frame
     for (int y = 0; y < CONTENT_HEIGHT; y++) {
         for (int x = 0; x < CONTENT_WIDTH; x++) {
             frame[y + VERTICAL_SPACING][x + HORIZONTAL_SPACING] = map[startY + y][startX + x];
         }
     }
     
-    // Draw top border
-    for (int x = 0; x < totalWidth; x++) {
-        frame[0][x] = "-";
-    }
-    frame[0][0] = "+";
-    frame[0][totalWidth - 1] = "+";
+    for (int x = 0; x < totalWidth; x++) frame[0][x] = "-";
+    frame[0][0] = "+"; frame[0][totalWidth - 1] = "+";
     
-    // Draw bottom border
-    for (int x = 0; x < totalWidth; x++) {
-        frame[totalHeight - 1][x] = "-";
-    }
-    frame[totalHeight - 1][0] = "+";
-    frame[totalHeight - 1][totalWidth - 1] = "+";
+    for (int x = 0; x < totalWidth; x++) frame[totalHeight - 1][x] = "-";
+    frame[totalHeight - 1][0] = "+"; frame[totalHeight - 1][totalWidth - 1] = "+";
     
-    // Draw left and right borders
     for (int y = 1; y < totalHeight - 1; y++) {
-        frame[y][0] = "|";
-        frame[y][totalWidth - 1] = "|";
+        frame[y][0] = "|"; frame[y][totalWidth - 1] = "|";
     }
     
-    // Print the top border line
-    for (int x = 0; x < totalWidth; x++) {
-        cout << frame[0][x];
-    }
+    for (int x = 0; x < totalWidth; x++) cout << frame[0][x];
     cout << endl;
     
-    // Print the rest of the frame
     for (int y = 1; y < totalHeight; y++) {
-        for (int x = 0; x < totalWidth; x++) {
-            cout << frame[y][x];
-        }
+        for (int x = 0; x < totalWidth; x++) cout << frame[y][x];
         cout << endl;
     }
 }
-
 
 string generateOverworldHealthBar(int currentHP, int maxHP) {
     if (maxHP <= 0) return "[]";
@@ -277,12 +203,8 @@ string generateOverworldHealthBar(int currentHP, int maxHP) {
     if (filledLength > barLength) filledLength = barLength;
 
     string bar = "[";
-    for (int i = 0; i < filledLength; i++) {
-        bar += "#";
-    }
-    for (int i = filledLength; i < barLength; i++) {
-        bar += " ";
-    }
+    for (int i = 0; i < filledLength; i++) bar += "#";
+    for (int i = filledLength; i < barLength; i++) bar += " ";
     bar += "]";
     return bar;
 }
@@ -294,14 +216,12 @@ void displayHUD() {
     cout << "======================================\n";
 
     Item* current = bag.head;
-    
     if (current == NULL) {
         cout << "  (No potions in inventory)\n";
     } else {
         while (current != NULL) {
             string originalName = current->name;
             size_t bracketPos = originalName.find("]");
-            
             if (bracketPos != string::npos) {
                 cout << " " << originalName.substr(0, bracketPos + 1) << "\n";
             } else {
@@ -320,7 +240,7 @@ int collisionDetection(int x, int y)
     return 0;   
 }
 
-int playerMovement(int& posX, int& posY)
+void playerMovement(int& posX, int& posY)
 {
     char input;      
     bool gameRunning = true;
@@ -328,8 +248,7 @@ int playerMovement(int& posX, int& posY)
     while(gameRunning)
     {
         int previousPositionX = posX, previousPositionY = posY;  
-        int nextX = posX;
-        int nextY = posY;
+        int nextX = posX; int nextY = posY;
 
         input = _getch();  
 
@@ -347,24 +266,33 @@ int playerMovement(int& posX, int& posY)
                 bool victory = startBattle(targetTile);
 
                 if (victory) {
-                    map[previousPositionY][previousPositionX] = " ";   
-                    posX = nextX;
-                    posY = nextY;
-                    map[posY][posX] = player;   
+                    if (targetTile == "D") {
+                        // looping
+                        loopCount++;
+                        initializeMap();
+                        posX = 27; posY = 50;
+                        map[posY][posX] = player;
+                        playerLog = "The Dragon fell! A deeper layer of the dungeon awakens...";
+                    } else {
+                        map[previousPositionY][previousPositionX] = ".";   
+                        posX = nextX; posY = nextY;
+                        map[posY][posX] = player;   
+                    }
                 } else {
                     console_clear_screen();
                     cout << "\n===================================\n";
                     cout << "   GAME OVER - YOU WERE DEFEATED   \n";
                     cout << "===================================\n";
+                    cout << "Press any key to return to title screen...";
+                    _getch(); 
                     gameRunning = false;
-                    break;
+                    break; 
                 }
             }
             else 
             {
                 map[previousPositionY][previousPositionX] = ".";   
-                posX = nextX;
-                posY = nextY;
+                posX = nextX; posY = nextY;
                 map[posY][posX] = player;   
             }
         }
@@ -372,14 +300,22 @@ int playerMovement(int& posX, int& posY)
         if (gameRunning) {
             console_clear_screen();      
             displayMap();                
-            displayHUD(); // Render active UI screen updates on step loop
+            displayHUD(); 
         }
     }
-    return 0;
 }
 
 void mainMenu()
 {
+    bag.reset();
+    relic.reset();
+
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+
     string line1 = R"(  _____       _      _____      _   _              _____                      )"; 
     string line2 = R"( |  __ \     | |    |  __ \    | | (_)            / ____|                     )";
     string line3 = R"( | |__) |___ | | ___| |__) |__ | |_ _  ___  _ __ | |  __  __ _ _ __ ___   ___ )";
@@ -387,38 +323,40 @@ void mainMenu()
     string line5 = R"( | | \ \ (_) | |  __/ |  | (_) | |_| | (_) | | | | |__| | (_| | | | | | |  __/)";
     string line6 = R"( |_|  \_\___/|_|\___|_|   \___/ \__|_|\___/|_| |_|\_____|\__,_|_| |_| |_|\___|)";
 
-    cout << line1 << endl;
-    cout << line2 << endl;
-    cout << line3 << endl;
-    cout << line4 << endl;
-    cout << line5 << endl;
-    cout << line6 << endl << endl;
+    cout << line1 << endl; cout << line2 << endl; cout << line3 << endl;
+    cout << line4 << endl; cout << line5 << endl; cout << line6 << endl << endl;
+
+    
 
     cout << "Press Enter to Start!\n";
     cin.get();
 }
 
-int main()
-{
-    initializeMap();
-    map[posY][posX] = player;  
-    bag.addItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn");
-    bag.addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
-    relic.addItem("[The Destruction] Heal 25% HP at the end of each fight, and raise max HP by 1");
-    #ifdef _WIN32
-        system("cls");  
-    #else
-        system("clear"); 
-    #endif
+int main(){
 
-    mainMenu();
-    console_clear_screen();      
-    displayMap();                
-    displayHUD(); 
-    playerMovement(posX, posY);   
+    while(true) {
+        // Reset game state
+        playerHP = 20;
+        playerMaxHP = 20;
+        loopCount = 1;
+        posX = 27; posY = 50;
+
+        initializeMap();
+        map[posY][posX] = player;  
+
+        #ifdef _WIN32
+            system("cls");  
+        #else
+            system("clear"); 
+        #endif
+
+        mainMenu();
+        console_clear_screen();      
+        displayMap();                
+        displayHUD(); 
+        
+        playerMovement(posX, posY);
+    }
 
     return 0;
 }
-
-
-

@@ -117,6 +117,16 @@ public:
         return false;
     }
 
+    int reset() {
+        while (head != NULL) {
+            Item* temp = head;
+            head = head->next;
+            delete temp;
+        }
+        addItem("[Attack Potion] Deals 1 DMG, return this potion at end of turn");
+        addItem("[Defend Potion] Block 2 DMG, return this potion at end of turn");
+    }
+
     friend int countPotions(Inventory& inv);
     friend void displayNumberedPotions(Inventory& inv);
     friend string getPotionAt(Inventory& inv, int targetIndex);

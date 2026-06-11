@@ -91,10 +91,5 @@ inline void handlePotionUsage(string chosenPotion, Inventory& bag, int& dmg, int
 
     }  
 
-
-
-
-
-
 }
 #endif

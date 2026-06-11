@@ -15,6 +15,9 @@
 
 using namespace std;
 
+// LOOP
+inline int loopCount = 1;
+
 // SETUP VARIABLES
 inline int playerHP = 20;
 inline int playerMaxHP = 20;
@@ -75,7 +78,6 @@ inline void displayNumberedPotions(Inventory& inv) {
         index++;
         temp = temp->next;
     }
-    cout << "  " << index << ". [Back to Action Menu]\n";
     cout << "===============================\n";
 }
 
@@ -158,16 +160,6 @@ inline void displayBattleScreen(bool canRunAway) {
 
     displayNumberedRelic(relic);
 
-    cout << "| " << string(SCREEN_WIDTH - 4, ' ') << " |\n";
-    cout << "|  [Action Menu]" << string(SCREEN_WIDTH - 17, ' ') << "|\n";
-    cout << "|  1. Select Potion" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
-    
-    if (canRunAway) {
-        cout << "|  2. Run Away" << string(SCREEN_WIDTH - 15, ' ') << "|\n";
-    } else {
-        cout << "|  [RETREAT LOCKED]" << string(SCREEN_WIDTH - 20, ' ') << "|\n";
-    }
-
     cout << "+";
     for (int i = 0; i < SCREEN_WIDTH - 2; i++) cout << "-";
     cout << "+\n";
@@ -183,34 +175,35 @@ inline void displayBattleScreen(bool canRunAway) {
 
 // MAIN
 inline bool startBattle(string enemyType) {
-
     random_device rd;
     mt19937 gen(rd());
 
     int potiondrop = 0;
     int relicdrop = 0;
-    bool interactionOccurred = false; // Tracks if player has locked in combat yet
+    bool interactionOccurred = false; 
 
+    
     if (enemyType == "E") {
         string monsterlist[] = {"Goblin", "Frog", "Slime", "Gambler", "Bat", "Porcupine"};
         uniform_int_distribution<int> dist(0, 5);
         monsterName = monsterlist[dist(gen)];
-        monsterHP = 6;
-        monsterMaxHP = 6;
+        monsterMaxHP = 6 * loopCount;
+        monsterHP = monsterMaxHP;
     } else if (enemyType == "B") {
         string bosslist[] = {"Mister Big Brain", "Beeg Cat", "Magician"};
         uniform_int_distribution<int> dist(0, 2);
         monsterName = bosslist[dist(gen)];
-        monsterHP = 20;
-        monsterMaxHP = 20;
+        monsterMaxHP = 20 * loopCount;
+        monsterHP = monsterMaxHP;
     } else if (enemyType == "D") {
         monsterName = "Dragon";
-        monsterHP = 40;
-        monsterMaxHP = 40;
+        monsterMaxHP = 40 * loopCount;
+        monsterHP = monsterMaxHP;
     }
 
     // Reset status conditions for the new fight
-    enemy_strength = 0; player_strength = 0; player_poison = 0; enemy_poison = 0;
+    enemy_strength = (loopCount - 1);
+    player_strength = 0; player_poison = 0; enemy_poison = 0;
     playerLog = "An enemy blocks your path!"; monsterLog = "";
 
     if (relic.contains("[Ring of Strength] +1 Strength")) {
@@ -235,26 +228,6 @@ inline bool startBattle(string enemyType) {
     if (relic.contains("[Charged Amulet] Player starts with 2 Strength, Enemy start with 1 strength")) {
         player_strength += 2;
         enemy_strength += 1;
-    }
-    if (relic.contains("[Art of War] Boss enemies start with 25% less HP")) {
-        if (enemyType == "B") {
-            monsterHP = monsterHP * 0.75;
-            monsterMaxHP = monsterMaxHP * 0.75;
-        }
-    }
-    if (relic.contains("[Scary Mask] Run away will gain you 1 HP")) {
-        playerLog += " The Scary Mask grants you 1 HP for this fight...\n";
-        playerHP += 1;
-        if (playerHP > playerMaxHP) playerHP = playerMaxHP;
-    }
-    if (relic.contains("[Dragon Scale] Reduce dragon attack damage by 1")) {
-        if (enemyType == "D") {
-            enemy_dmg -= 1;
-        }
-    }
-    if (relic.contains("[First Strike] Deal 3 DMG at the start of combat")) {
-        monsterHP -= 3;
-        playerLog += " The First Strike relic deals 3 DMG to the enemy at the start of combat!\n";
     }
 
     string PotionList[] = {
@@ -281,19 +254,14 @@ inline bool startBattle(string enemyType) {
         "[Weakening Charm] Enemy start with 1 less Strength",
         "[Charged Amulet] Player starts with 2 Strength, Enemy start with 1 strength",
         "[Scary Mask] Run away will gain you 1 HP",
-        "[Dragon Scale] Reduce dragon attack damage by 1",
-        "[First Strike] Deal 3 DMG at the start of combat",
     };
 
     generateNextIntent();
     
     while (playerHP > 0 && monsterHP > 0) {
-        // Can run away ONLY if it's not a dragon AND no potion has been used yet
         bool canRunAway = (enemyType != "D") && (!interactionOccurred);
 
         displayBattleScreen(canRunAway);
-        
-        // Directly display the dynamic list inside the action block frame with no exit option
         displayNumberedPotions(bag);
 
         if (canRunAway) {
@@ -309,17 +277,14 @@ inline bool startBattle(string enemyType) {
             continue;
         }
 
-        // Handle escape routing cleanly via an override variable value
         if (potChoice == 99) {
             if (canRunAway) {
                 cout << "\nYou ran away from combat!\n";
-
                 if (relic.contains("[Scary Mask] Run away will gain you 1 HP")) {
                     playerHP += 1;
                     if (playerHP > playerMaxHP) playerHP = playerMaxHP;
                     cout << "But the Scary Mask grants you 1 HP for running away...\n";
                 }
-
                 cout << "Press any key to continue...";
                 _getch();
                 return true; 
@@ -331,7 +296,6 @@ inline bool startBattle(string enemyType) {
 
         int totalPotions = countPotions(bag);
         if (potChoice >= 1 && potChoice <= totalPotions) {
-            // A valid potion item execution drops running capabilities permanently
             interactionOccurred = true;
 
             string chosenPotion = getPotionAt(bag, potChoice);
@@ -358,26 +322,15 @@ inline bool startBattle(string enemyType) {
                 #endif
 
                 if (enemyType == "E") {
-                    potiondrop = 2;
-                    relicdrop = 0;
-                }
-                else if (enemyType == "B") {
-                    potiondrop = 4;
-                    relicdrop = 1;
-                }
-                else if (enemyType == "D") {
-                    potiondrop = 6;
-                    relicdrop = 1;
+                    potiondrop = 2; relicdrop = 0;
+                } else if (enemyType == "B") {
+                    potiondrop = 4; relicdrop = 1;
+                } else if (enemyType == "D") {
+                    potiondrop = 6; relicdrop = 1;
                 }
 
                 if (relic.contains("[Potion Satchel] Enemy drop 1 extra potion")) {
                     potiondrop += 1;
-                }
-                if (relic.contains("[The Destruction] Heal 25% HP at the end of each fight, and raise max HP by 1")) {
-                        playerMaxHP += 1;    
-                        playerHP += playerMaxHP * 0.25;
-                        if (playerHP > playerMaxHP) playerHP = playerMaxHP;
-                        
                 }
 
                 cout << "===============LOOTS===============\n" << endl;
@@ -395,22 +348,28 @@ inline bool startBattle(string enemyType) {
                 }
 
                 cout << "\n===================================\n";
-                cout << "  VICTORY! You defeated the monster!\n";
+                if (enemyType == "D") {
+                    cout << "  MAJESTIC VICTORY! THE DRAGON HAS FALLEN!\n";
+                    cout << "  The world shifts... Enemies grow stronger...\n";
+                } else {
+                    cout << "  VICTORY! You defeated the monster!\n";
+                }
                 cout << "===================================\n";
-                cout << "Press any key to return to the world map...";
+                cout << "Press any key to continue...";
                 _getch();
                 return true; 
             }
 
+            // Enemy Turn calculation
             if (enemyIntent.find("Attack") != string::npos) {
-                int combinedEnemyDmg = enemy_dmg + enemy_strength;
+                int combinedEnemyDmg = enemy_dmg + enemy_strength + (loopCount - 1);
                 int damageAfterBlock = combinedEnemyDmg - block;
                 if (damageAfterBlock < 0) damageAfterBlock = 0;
                 playerHP -= damageAfterBlock;
                 monsterLog = monsterName + " attacks for " + to_string(combinedEnemyDmg) + " DMG! Player blocks " + to_string(block) + " DMG.";
-            }
-            else if (enemyIntent.find("Buff") != string::npos) {
+            } else if (enemyIntent.find("Buff") != string::npos) {
                 monsterLog = monsterName + " buffs itself";
+                enemy_strength += loopCount; 
             }
 
             if (enemy_poison > 0) {
@@ -419,14 +378,11 @@ inline bool startBattle(string enemyType) {
             }
         
             if (monsterHP > monsterMaxHP) monsterHP = monsterMaxHP;
-
-            if (playerHP <= 0) {
-                return false; 
-            }
+            if (playerHP <= 0) return false; 
 
             generateNextIntent(); 
         } else {
-            playerLog = "Out of range choice allocation selected.";
+            playerLog = "Out of range potion number selection.";
         }
     }
     return playerHP > 0;

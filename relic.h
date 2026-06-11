@@ -127,6 +127,15 @@ public:
         return false;
     }
 
+    int reset() {
+        while (head != NULL) {
+            RelicInv* temp = head;
+            head = head->next;
+            delete temp;
+        }
+        addItem("[The Destruction] Heal 25% HP at the end of each fight, and raise max HP by 1");
+    }
+
     friend int countRelic(Relic& rec);
     friend void displayNumberedRelic(Relic& rec);
     friend string getRelicAt(Relic& rec, int targetIndex);
